@@ -24,29 +24,5 @@ urlpatterns = [] + static(settings.STATIC_URL)
 if settings.DEBUG:
     urlpatterns.append(path('admin/', admin.site.urls))
 
-if settings.SERVICE_NAME == settings.SERVICE_MYDB_DATA_LAYER:
-    urlpatterns.append(path(settings.SERVICE_MYDB_DATA_LAYER+'/', include('mydb_data_layer.urls')))
-
-if settings.SERVICE_NAME == settings.SERVICE_MYDB_ADAPTER_LAYER:
-    urlpatterns.append(path(settings.SERVICE_MYDB_ADAPTER_LAYER+'/', include('mydb_adapter_layer.urls')))
-
-if settings.SERVICE_NAME == settings.SERVICE_CHOREOGRAPHER:
-    urlpatterns.append(path(settings.SERVICE_CHOREOGRAPHER+'/', include('choreographer.urls')))
-
-if settings.SERVICE_NAME == settings.SERVICE_BUSINESS_LOGIC:
-    urlpatterns.append(path(settings.SERVICE_BUSINESS_LOGIC+'/', include('business_logic.urls')))
-
-if settings.SERVICE_NAME == settings.SERVICE_PROCESS_CENTRIC:
-    urlpatterns.append(path(settings.SERVICE_PROCESS_CENTRIC+'/', include('process_centric_layer.urls')))
-
-if settings.SERVICE_NAME == settings.SERVICE_KNOWLEDGE:
-    urlpatterns.append(path(settings.SERVICE_KNOWLEDGE+'/', include('knowledge_graph_data_layer.urls')))
-
-if settings.SERVICE_NAME == settings.SERVICE_PROCESS_CENTRIC_DB:
-    urlpatterns.append(path(settings.SERVICE_PROCESS_CENTRIC_DB+'/', include('process_centric_db_layer.urls')))
-
 if settings.SERVICE_NAME == settings.SERVICE_BUSINESS_LOGIC_DB:
     urlpatterns.append(path(settings.SERVICE_BUSINESS_LOGIC_DB+'/', include('business_logic_db_layer.urls')))
-
-if settings.SERVICE_NAME == settings.SERVICE_QUERY_SELECTION:
-    urlpatterns.append(path(settings.SERVICE_QUERY_SELECTION+'/', include('query_selection_service.urls')))

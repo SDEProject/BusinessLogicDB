@@ -126,13 +126,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-MYDB_HOST = 'localhost'
-MYDB_PORT = 8000
+MYDB_HOST = 'mydb-data-layer.herokuapp.com'
+MYDB_PORT = 8000 if DEBUG else 80
 SERVICE_MYDB_DATA_LAYER = "mydb_data_layer"
 
 SERVICE_MYDB_ADAPTER_LAYER = "mydb_adapter_layer"
 SERVICE_MYDB_ADAPTER_LAYER_PORT = 50005 if DEBUG else 80
-SERVICE_MYDB_ADAPTER_LAYER_HOST = 'localhost'
+SERVICE_MYDB_ADAPTER_LAYER_HOST = 'mydb-adapter-layer.herokuapp.com'
 
 SERVICE_CHOREOGRAPHER = 'choreographer'
 SERVICE_CHOREOGRAPHER_PORT = 50006 if DEBUG else 80
