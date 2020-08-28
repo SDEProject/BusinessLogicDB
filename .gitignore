@@ -2,3 +2,6 @@ __pycache__
 venv/
 .idea/
 db.sqlite3
+.DS_Store
+travelando/__pycache__/
+business_logic_db_layer/__pycache__/
