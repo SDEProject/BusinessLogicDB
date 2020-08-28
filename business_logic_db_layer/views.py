@@ -1,5 +1,5 @@
 import requests
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseNotFound
 from django.shortcuts import render
 
 # Create your views here.
@@ -73,6 +73,48 @@ class SearchView(View):
 
 
 class ResultView(View):
+    def get_first_address(self, parameters):
+        response = requests.get(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/address", parameters)
+        if response.status_code == 200:
+            json_response = response.json()
+            if json_response:
+                return json_response[0]
+        return None
+
+    def create_address(self, json):
+        response = requests.post(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/address/", None, json)
+        return response
+
+    def get_or_create_address(self, address):
+        response = self.get_first_address(address)
+        print(f"get first result: {response}")
+        if not response:
+            address_response = self.create_address(address)
+            if address_response.status_code == 201:
+                response = address_response.json()
+        return response
+
+    def create_new_result(self, json, address_id):
+        json["address"] = address_id
+        response = requests.post(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/result/", None, json)
+        return response
+
+    def get_result(self, parameters):
+        response = requests.get(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/result", parameters)
+        return response
+
+    def create_single_result(self, information_result, information_address):
+        response = self.get_result(information_result)
+        response_content = response.content.decode('utf-8')
+        response_json = json.loads(response_content)
+        if not response_json:
+            address = self.get_or_create_address(information_address)
+            print(f"address {address}")
+            if address:
+                response = self.create_new_result(information_result, address["id"])
+        print(f"response code: {response.status_code}")
+        return response
+
     def save_result(self, parameters):
         ordinal = parameters['request_parameters']['ordinal']
 
@@ -80,10 +122,40 @@ class ResultView(View):
             f"http://{settings.SERVICE_MYDB_ADAPTER_LAYER_HOST}:{settings.SERVICE_MYDB_ADAPTER_LAYER_PORT}/{settings.SERVICE_MYDB_ADAPTER_LAYER}/result/",
             None, parameters)
 
-        if ordinal:
-            response = Template.save_response_message("result", response.status_code)
+        if response.status_code == 200:
+            response_content = response.content.decode('utf-8')
+            json_results = json.loads(response_content)
+            results = json_results['results']
+            addresses = json_results['addresses']
+
+            if results:
+                if ordinal:
+                    if ordinal != "last":
+                        index = int(ordinal)
+                        result = results[index - 1]
+                        address = addresses[index -1]
+                    else:
+                        last = len(results) - 1
+                        result = results[last]
+                        address = addresses[last]
+                    response = self.create_single_result(result, address)
+                    response = Template.save_response_message("result", response.status_code)
+                else:
+                    status_code = []
+                    index = -1
+                    for result in results:
+                        index += 1
+                        response = self.create_single_result(result, addresses[index])
+                        status_code.append(response.status_code)
+                    if 201 in status_code:
+                        response.status_code = 201
+                        response = Template.save_response_message("results", response.status_code)
         else:
-            response = Template.save_response_message("results", response.status_code)
+            if ordinal:
+                print(response)
+                response = Template.save_response_message("result", response.status_code)
+            else:
+                response = Template.save_response_message("results", response.status_code)
         return response
 
     def retrieve_result(self, parameters):
