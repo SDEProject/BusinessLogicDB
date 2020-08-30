@@ -21,6 +21,12 @@ class SearchView(View):
 
         context = parameters['context']
 
+        response_query = requests.get(
+            f"http://{settings.SERVICE_QUERY_SELECTION_HOST}:{settings.SERVICE_QUERY_SELECTION_PORT}/{settings.SERVICE_QUERY_SELECTION}/query_selection",
+            context)
+        query = json.loads(response_query.content)['query']
+        parameters['query'] = query
+
         search = {
             'type': context['subject'],
             'date': '2020-05-10',
@@ -174,6 +180,8 @@ class ResultView(View):
         response_json = json.loads(response_content)
         results = response_json
 
+        print(f"RESULTS: {results}")
+
         if ordinal:
             if ordinal != "last":
                 ordinal = int(float(ordinal))
@@ -207,6 +215,14 @@ class ResultView(View):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
 
+        context = parameters['context']
+
+        response_query = requests.get(
+            f"http://{settings.SERVICE_QUERY_SELECTION_HOST}:{settings.SERVICE_QUERY_SELECTION_PORT}/{settings.SERVICE_QUERY_SELECTION}/query_selection",
+            context)
+        query = json.loads(response_query.content)['query']
+        parameters['query'] = query
+
         response = self.save_result(parameters)
 
         return JsonResponse(response)
@@ -231,7 +247,6 @@ class DeleteView(View):
         response_content = response.content.decode('utf-8')
         response_json = json.loads(response_content)
         results = response_json
-        print(results)
 
         if ordinal:
             if ordinal != "last":
@@ -263,8 +278,10 @@ class DeleteView(View):
                 status_code = 404
         elif len(status_codes) == 1:
             status_code = status_codes[0]
+        elif len(status_codes) == 0:
+            status_code = 200
         else:
-            status_code = 500
+            status_codes = 500
 
         response = Template.delete_response_message(type, status_code)
         return response
@@ -282,16 +299,18 @@ class Template:
     @staticmethod
     def retrieve_result_response_templates(results):
         messages = []
-
-        for result in results:
-            message = f'Result #{result["id"]}: {result["name"]} {result["type"]}'
-            if result['stars'] != '':
-                message += f' with {result["stars"]} star'
-                if result['stars'] > 1:
-                    message += 's'
-            message += f' in {result["street"]} {result["number"]} {result["city"]} ({result["province"]})'
-
-            messages.append(message)
+        message = ""
+        if results:
+            for result in results:
+                message = f'Result #{result["id"]}: {result["name"]} {result["type"]}'
+                if result['stars'] != '':
+                    message += f' with {result["stars"]} star'
+                    if result['stars'] > 1:
+                        message += 's'
+                message += f' in {result["street"]} {result["number"]} {result["city"]} ({result["province"]})'
+        else:
+            message = "No results to show"
+        messages.append(message)
 
         return messages
 
@@ -340,6 +359,8 @@ class Template:
             message.append(f"The {type} is successfully deleted!")
         elif status_code == 404:
             message.append(f"{type.title()} not found!")
+        elif status_code == 200:
+            message.append(f"No {type} to delete")
         else:
             message.append(f"ERROR: Something was wrong!")
         return message
