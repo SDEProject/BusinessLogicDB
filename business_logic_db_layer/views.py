@@ -317,10 +317,15 @@ class Template:
     @staticmethod
     def retrieve_search_response_templates(results):
         messages = []
+        message = ""
 
-        for result in results:
-            message = f'Search #{result["id"]} with fields: (subject={result["type"]}, city={result["city"]}, date={result["date"]})'
-            messages.append(message)
+        if results:
+            for result in results:
+                message = f'Search #{result["id"]} with fields: (subject={result["type"]}, city={result["city"]}, date={result["date"]})'
+                messages.append(message)
+        else:
+            message = "No searches to show"
+        messages.append(message)
 
         return messages
 
