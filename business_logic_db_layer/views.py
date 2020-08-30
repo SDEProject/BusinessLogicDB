@@ -281,7 +281,7 @@ class DeleteView(View):
         elif len(status_codes) == 0:
             status_code = 200
         else:
-            status_codes = 500
+            status_code = 500
 
         response = Template.delete_response_message(type, status_code)
         return response
