@@ -580,13 +580,13 @@ class Template:
                             message += 's'
 
                     check = False
-                    if result_information['start_hour'] is not None:
+                    if result_information['start_hour'] != 'None':
                         message += f', check in starting from {result_information["start_hour"]}'
-                    elif result_information['end_hour'] is not None:
+                    elif result_information['end_hour'] != 'None':
                         message += f', check in until {result_information["end_hour"]}'
                         check = True
 
-                    if result_information['end_hour'] is not None and not check:
+                    if result_information['end_hour'] != 'None' and not check:
                         message += f' to {result_information["end_hour"]}'
                 elif type == 'ActivityPath':
                     message += f' path from {result_information["path_from"]} to {result_information["path_to"]}. ' \
