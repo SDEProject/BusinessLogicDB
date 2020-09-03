@@ -4,33 +4,134 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.views import View
+from drf_yasg.utils import swagger_auto_schema
 from requests import Response
 from rest_framework import viewsets, mixins
+from rest_framework.views import APIView
+
 from travelando import settings
 import json
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
 # Create your views here.
-class SearchView(View):
+class SearchView(APIView):
     def get_search(self, parameters):
         response = requests.get(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/search", parameters)
         return response
 
+    @swagger_auto_schema(
+        operation_description="POST in order to create one or more results in the database",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'context': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                          properties={
+                                              'comune': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'comune.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'checkin': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'checkin.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'subject': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'subject.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'class_to': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'class_to.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'stop': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'stop.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'comune_from': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'comune_from.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'comune_to': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'comune_to.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'class_from': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'class_from.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'region': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'region.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'poi_activity_from': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'poi_activity_from.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'poi_activity_to': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'poi_activity_to.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'path_number': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'path_number.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'information': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'information.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'shop_enum': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'shop_enum.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'order': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'order.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'path_difficulty': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'path_difficulty.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'info_equipment': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'info_equipment.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'type_period': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'type_period.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                              'ordinal.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'type': openapi.Schema(type=openapi.TYPE_STRING),
+                                              'type.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                          }
+                                          ),
+                'request_parameters': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                                     properties={
+                                                         'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                                         'type': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'intentName': openapi.Schema(type=openapi.TYPE_STRING)
+                                                     }
+                                                     )
+            },
+        ),
+        responses={
+            201: '{"fulfillmentMessages": [{"text": {"text": ["Search is saved successfully!"]}}]}',
+            200: '{"fulfillmentMessages": [{"text": {"text": ["The search is already saved!"]}}]}',
+            404: '{"fulfillmentMessages": [{"text": {"text": ["No search found to save!"]}}]}',
+            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
+        },
+        tags=['Searches']
+    )
     def post(self, request):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
 
+        print(parameters)
         context = parameters['context']
 
         response_query = requests.get(
-            f"http://{settings.SERVICE_QUERY_SELECTION_HOST}:{settings.SERVICE_QUERY_SELECTION_PORT}/{settings.SERVICE_QUERY_SELECTION}/query_selection",
+            f"http://{settings.SERVICE_UTILITY_HOST}:{settings.SERVICE_UTILITY_PORT}/{settings.SERVICE_UTILITY}/query_selection",
             context)
         query = json.loads(response_query.content)['query']
         parameters['query'] = query
 
+        information = ""
+        path_difficulty = ""
+        order = ""
+
+        for val in context['information']:
+            information += val + " "
+
+        for val in context['path_difficulty']:
+            path_difficulty += val + " "
+
+        for val in context['order']:
+            order += val + " "
+
         search = {
-            'type': context['subject'],
-            'date': '2020-05-10',
-            'city': context['comune']
+            'subject': context['subject'],
+            'checkin': context['checkin'],
+            'city': context['comune'],
+            'comune_from': context['comune_from'],
+            'comune_to': context['comune_to'],
+            'class_to': context['class_to'],
+            'class_from': context['class_from'],
+            'region': context['region'],
+            'poi_activity_from': context['poi_activity_from'],
+            'poi_activity_to': context['poi_activity_to'],
+            'path_number': context['path_number'],
+            'information': information,
+            'shop_enum': context['shop_enum'],
+            'order': order,
+            'path_difficulty': path_difficulty,
+            'info_equipment': context['info_equipment'],
+            'time_period': context['time_period'],
+            'type': context['type'],
+            'ordinal': context['ordinal']
         }
 
         response = self.get_search(search)
@@ -44,6 +145,26 @@ class SearchView(View):
 
         return JsonResponse(response)
 
+    @swagger_auto_schema(
+        operation_description="POST in order to create one or more results in the database",
+        manual_parameters=[
+            openapi.Parameter('type', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_STRING),
+            openapi.Parameter('ordinal', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_NUMBER),
+            openapi.Parameter('number', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_NUMBER),
+            openapi.Parameter('Info', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_STRING)
+        ],
+
+        responses={
+            200: '{"fulfillmentMessages": [{"text": {"text": ["Search #{id} with fields: (subject={type}, city={city}, date={date}"]}}]}',
+            404: '{"fulfillmentMessages": [{"text": {"text": ["No search to show"]}}]}',
+            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
+        },
+        tags=['Searches']
+    )
     def get(self, request):
         parameters = request.GET
         ordinal = parameters.get('ordinal', None)
@@ -55,7 +176,6 @@ class SearchView(View):
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/search/",
             get_parameters)
 
-        print(response)
         response_content = response.content.decode('utf-8')
         response_json = json.loads(response_content)
         results = response_json
@@ -72,13 +192,12 @@ class SearchView(View):
                 if current_index == required_index:
                     results = [result]
 
-        print(results)
         response = Template.retrieve_search_response_message(results)
 
         return JsonResponse(response)
 
 
-class ResultView(View):
+class ResultView(APIView):
     def get_first_address(self, parameters):
         response = requests.get(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/address", parameters)
         if response.status_code == 200:
@@ -93,7 +212,6 @@ class ResultView(View):
 
     def get_or_create_address(self, address):
         response = self.get_first_address(address)
-        print(f"get first result: {response}")
         if not response:
             address_response = self.create_address(address)
             if address_response.status_code == 201:
@@ -115,10 +233,8 @@ class ResultView(View):
         response_json = json.loads(response_content)
         if not response_json:
             address = self.get_or_create_address(information_address)
-            print(f"address {address}")
             if address:
                 response = self.create_new_result(information_result, address["id"])
-        print(f"response code: {response.status_code}")
         return response
 
     def save_result(self, parameters):
@@ -139,11 +255,12 @@ class ResultView(View):
                     if ordinal != "last":
                         index = int(ordinal)
                         result = results[index - 1]
-                        address = addresses[index -1]
+                        address = addresses[index - 1]
                     else:
                         last = len(results) - 1
                         result = results[last]
                         address = addresses[last]
+                    print(f"RESULT: {result}")
                     response = self.create_single_result(result, address)
                     response = Template.save_response_message("result", response.status_code)
                 else:
@@ -158,7 +275,6 @@ class ResultView(View):
                         response = Template.save_response_message("results", response.status_code)
         else:
             if ordinal:
-                print(response)
                 response = Template.save_response_message("result", response.status_code)
             else:
                 response = Template.save_response_message("results", response.status_code)
@@ -168,6 +284,9 @@ class ResultView(View):
         ordinal = parameters.get('ordinal', None)
         number = parameters.get('number', None)
         info = parameters.get('info', None)
+        subject = parameters.get('Class', None)
+        path_difficulty = parameters.get('DifficultyActivityPath', None)
+        shop_enum = parameters.get('ShopEnum', None)
 
         get_parameters = {}
         if number and info:
@@ -180,7 +299,26 @@ class ResultView(View):
         response_json = json.loads(response_content)
         results = response_json
 
-        print(f"RESULTS: {results}")
+        if subject != '':
+            type_results = []
+            for result in results:
+                if result['type'] == subject:
+                    type_results.append(result)
+            results = type_results
+
+        if path_difficulty != '':
+            difficulty_result = []
+            for result in results:
+                if result['path_difficulty'] == path_difficulty:
+                    difficulty_result.append(result)
+            results = difficulty_result
+
+        if shop_enum != '':
+            shop_result = []
+            for result in results:
+                if result['shop_enum'] == shop_enum:
+                    shop_result.append(result)
+            results = shop_result
 
         if ordinal:
             if ordinal != "last":
@@ -197,20 +335,83 @@ class ResultView(View):
         new_results = []
         for result in results:
             address_index = result["address"]
-            print(address_index)
             address_response = requests.get(
                 f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/address/{result['address']}/",
                 None)
             address_content = address_response.content.decode('utf-8')
             address_json = json.loads(address_content)
-            new_result = {"id": result["id"], "name": result["name"], "stars": result["stars"], "type": result["type"],
-                          "city": address_json["city"], "street": address_json["street"], "number": address_json["number"],
-                          "province": address_json["province"]}
+            new_result = {'result_information': result, 'address_information': address_json}
             new_results.append(new_result)
 
         response = Template.retrieve_result_response_message(new_results)
         return response
 
+    @swagger_auto_schema(
+        operation_description="POST in order to create one or more results in the database",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'context': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                                     properties={
+                                                         'comune': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'comune.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'checkin': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'checkin.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'subject': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'subject.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'class_to': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'class_to.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'stop': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'stop.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'comune_from': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'comune_from.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'comune_to': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'comune_to.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'class_from': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'class_from.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'region': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'region.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'poi_activity_from': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'poi_activity_from.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'poi_activity_to': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'poi_activity_to.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'path_number': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'path_number.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'information': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'information.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'shop_enum': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'shop_enum.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'order': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'order.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'path_difficulty': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'path_difficulty.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'info_equipment': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'info_equipment.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'type_period': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'type_period.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                                         'ordinal.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'type': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'type.original': openapi.Schema(type=openapi.TYPE_STRING),
+                                                     }
+                                                     ),
+                'request_parameters': openapi.Schema(type=openapi.TYPE_OBJECT,
+                                                     properties={
+                                                         'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
+                                                         'type': openapi.Schema(type=openapi.TYPE_STRING),
+                                                         'intentName': openapi.Schema(type=openapi.TYPE_STRING)
+                                                     }
+                                                     )
+            },
+        ),
+        responses={
+            201: '{"fulfillmentMessages": [{"text": {"text": ["Result is saved successfully!"]}}]}',
+            200: '{"fulfillmentMessages": [{"text": {"text": ["The result is already saved!"]}}]}',
+            404: '{"fulfillmentMessages": [{"text": {"text": ["No result found to save!"]}}]}',
+            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
+        },
+        tags=['Results']
+    )
     def post(self, request):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
@@ -218,7 +419,7 @@ class ResultView(View):
         context = parameters['context']
 
         response_query = requests.get(
-            f"http://{settings.SERVICE_QUERY_SELECTION_HOST}:{settings.SERVICE_QUERY_SELECTION_PORT}/{settings.SERVICE_QUERY_SELECTION}/query_selection",
+            f"http://{settings.SERVICE_UTILITY_HOST}:{settings.SERVICE_UTILITY_PORT}/{settings.SERVICE_UTILITY}/query_selection",
             context)
         query = json.loads(response_query.content)['query']
         parameters['query'] = query
@@ -227,6 +428,26 @@ class ResultView(View):
 
         return JsonResponse(response)
 
+    @swagger_auto_schema(
+        operation_description="POST in order to create one or more results in the database",
+        manual_parameters=[
+            openapi.Parameter('type', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_STRING),
+            openapi.Parameter('ordinal', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_NUMBER),
+            openapi.Parameter('number', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_NUMBER),
+            openapi.Parameter('Info', in_=openapi.IN_QUERY,
+                              type=openapi.TYPE_STRING)
+        ],
+
+        responses={
+            200: '{"fulfillmentMessages": [{"text": {"text": ["Result #{id}: {name} hotel with {star} stars in {address} {number} {city} ({province})"]}}]}',
+            404: '{"fulfillmentMessages": [{"text": {"text": ["No results to show"]}}]}',
+            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
+        },
+        tags=['Results']
+    )
     def get(self, request):
         parameters = request.GET
 
@@ -234,12 +455,15 @@ class ResultView(View):
 
         return JsonResponse(response)
 
-class DeleteView(View):
+class DeleteView(APIView):
     def remove_item(self, parameters):
         ordinal = parameters.get('ordinal', None)
         number = parameters.get('number', None)
         info = parameters.get('Info', None)
         type = parameters.get('type', None)
+        subject = parameters.get('Class', None)
+        path_difficulty = parameters.get('DifficultyActivityPath', None)
+        shop_enum = parameters.get('ShopEnum', None)
 
         response = requests.get(
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/" +
@@ -247,6 +471,27 @@ class DeleteView(View):
         response_content = response.content.decode('utf-8')
         response_json = json.loads(response_content)
         results = response_json
+
+        if subject != '':
+            type_results = []
+            for result in results:
+                if result['type'] == subject:
+                    type_results.append(result)
+            results = type_results
+
+        if path_difficulty != '':
+            difficulty_result = []
+            for result in results:
+                if result['path_difficulty'] == path_difficulty:
+                    difficulty_result.append(result)
+            results = difficulty_result
+
+        if shop_enum != '':
+            shop_result = []
+            for result in results:
+                if result['shop_enum'] == shop_enum:
+                    shop_result.append(result)
+            results = shop_result
 
         if ordinal:
             if ordinal != "last":
@@ -261,14 +506,15 @@ class DeleteView(View):
                     results = [result]
 
         status_codes = []
-
         for result in results:
             if info == 'id':
                 id = int(float(number))
             else:
                 id = result['id']
+            print(f'id {id}')
             response = requests.delete(
                 f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/" + type + "/" + str(id) + "/")
+            print(f"status code {response.status_code}")
             status_codes.append(response.status_code)
 
         if len(status_codes) > 1:
@@ -286,6 +532,26 @@ class DeleteView(View):
         response = Template.delete_response_message(type, status_code)
         return response
 
+    @swagger_auto_schema(
+        operation_description="POST in order to create one or more results in the database",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'type': openapi.Schema(type=openapi.TYPE_STRING),
+                'Info': openapi.Schema(type=openapi.TYPE_STRING),
+                'number': openapi.Schema(type=openapi.TYPE_NUMBER),
+                'intentName': openapi.Schema(type=openapi.TYPE_STRING)
+            },
+        ),
+        responses={
+            204: '{"fulfillmentMessages": [{"text": {"text": ["The search or result is successfully deleted!"]}}]}',
+            200: '{"fulfillmentMessages": [{"text": {"text": ["Search or result not found!"]}}]}',
+            404: '{"fulfillmentMessages": [{"text": {"text": ["Search or result table is empty"]}}]}',
+            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
+        },
+        tags=['Delete results and searches']
+    )
     def post(self, request):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
@@ -302,12 +568,34 @@ class Template:
         message = ""
         if results:
             for result in results:
-                message = f'Result #{result["id"]}: {result["name"]} {result["type"]}'
-                if result['stars'] != '':
-                    message += f' with {result["stars"]} star'
-                    if result['stars'] > 1:
-                        message += 's'
-                message += f' in {result["street"]} {result["number"]} {result["city"]} ({result["province"]})'
+                result_information = result['result_information']
+                address_information = result['address_information']
+                type = result_information['type']
+
+                message += f'Result #{result_information["id"]}: {result_information["name"]}'
+                if type == 'hotel':
+                    if result_information["stars"] is not None:
+                        message += f' with {result_information["stars"]} star'
+                        if result_information['stars'] > 1:
+                            message += 's'
+
+                    check = False
+                    if result_information['start_hour'] is not None:
+                        message += f', check in starting from {result_information["start_hour"]}'
+                    elif result_information['end_hour'] is not None:
+                        message += f', check in until {result_information["end_hour"]}'
+                        check = True
+
+                    if result_information['end_hour'] is not None and not check:
+                        message += f' to {result_information["end_hour"]}'
+                elif type == 'ActivityPath':
+                    message += f' path from {result_information["path_from"]} to {result_information["path_to"]}. ' \
+                               f'Total time: {result_information["time"]} minutes. Length {result_information["path_length"]} m'
+                elif type == 'Shop':
+                    message += f''
+                if type != 'ActivityPath':
+                    message += f' in {address_information["street"]} {address_information["number"]} {address_information["city"]} ({address_information["province"]})'
+                message += f'.\n'
         else:
             message = "No results to show"
         messages.append(message)
@@ -318,13 +606,17 @@ class Template:
     def retrieve_search_response_templates(results):
         messages = []
         message = ""
-
         if results:
             for result in results:
-                message = f'Search #{result["id"]} with fields: (subject={result["type"]}, city={result["city"]}, date={result["date"]})'
-                messages.append(message)
+                message = f'Search #{result["id"]} with fields: (subject={result["subject"]}, city={result["city"]}, ' \
+                          f'checkin={result["checkin"]}, comune_from={result["class_from"]}, comune_to={result["comune_to"]},' \
+                          f'class_from={result["class_from"]}, class_to={result["class_to"]}, region={result["region"]},' \
+                          f'poi_activity_from={result["poi_activity_from"]}, poi_activity_to={result["poi_activity_to"]},' \
+                          f'path_number={result["path_number"]}, information={result["information"]}, shop_enum={result["shop_enum"]},' \
+                          f'order={result["order"]}, path_difficulty={result["path_difficulty"]}, info_equipment={result["info_equipment"]},' \
+                          f'time_period={result["time_period"]}, type={result["type"]}, ordinal={result["ordinal"]})'
         else:
-            message = "No searches to show"
+            message = "No results to show"
         messages.append(message)
 
         return messages
@@ -365,7 +657,7 @@ class Template:
         elif status_code == 404:
             message.append(f"{type.title()} not found!")
         elif status_code == 200:
-            message.append(f"No {type} to delete")
+            message.append(f"{type.title()} table is empty")
         else:
             message.append(f"ERROR: Something was wrong!")
         return message
