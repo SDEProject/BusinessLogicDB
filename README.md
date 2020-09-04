@@ -27,7 +27,7 @@ The bot is able to understand the following sentences:
 
 **Retrieve**
 * Give me all [results]
-* Give me the [first] result
+* Give me the [first] [result]
 * Give me the [hotel] result
 * Give me the [first] [hotel] result
 * Give me the [local traditional] shop results
@@ -36,7 +36,7 @@ The bot is able to understand the following sentences:
 
 **Delete**
 * Delete all [results]
-* Delete the [first] result
+* Delete the [first] [result]
 * Delete the [hotel] result
 * Delete the [first] [hotel] result
 * Delete the [local traditional] shop results
