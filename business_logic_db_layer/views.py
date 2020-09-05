@@ -572,8 +572,10 @@ class Template:
                 address_information = result['address_information']
                 type = result_information['type']
 
-                message += f'Result #{result_information["id"]}: {result_information["name"]}'
+                message += f'Result [{result_information["id"]}]:\n' \
+                           f'• Name: {result_information["name"]}\n'
                 if type == 'hotel':
+                    message += f'• Type: Hotel\n'
                     if result_information["stars"] is not None:
                         message += f' with {result_information["stars"]} star'
                         if result_information['stars'] > 1:
@@ -581,21 +583,23 @@ class Template:
 
                     check = False
                     if result_information['start_hour'] != 'None':
-                        message += f', check in starting from {result_information["start_hour"]}'
+                        message += f'• Check-in from {result_information["start_hour"]}'
                     elif result_information['end_hour'] != 'None':
-                        message += f', check in until {result_information["end_hour"]}'
+                        message += f'• Check-in until {result_information["end_hour"]}\n'
                         check = True
 
                     if result_information['end_hour'] != 'None' and not check:
-                        message += f' to {result_information["end_hour"]}'
+                        message += f' to {result_information["end_hour"]}\n'
                 elif type == 'ActivityPath':
-                    message += f' path from {result_information["path_from"]} to {result_information["path_to"]}. ' \
-                               f'Total time: {result_information["time"]} minutes. Length {result_information["path_length"]} m'
+                    message += f'• Type: Path\n'
+                    message += f'• From {result_information["path_from"]} to {result_information["path_to"]}\n' \
+                               f'• Total time: {result_information["time"]} minutes\n' \
+                               f'• Total distance: {result_information["path_length"]} meters'
                 elif type == 'Shop':
-                    message += f''
+                    message += f'• Type: Shop\n'
                 if type != 'ActivityPath':
-                    message += f' in {address_information["street"]} {address_information["number"]} {address_information["city"]} ({address_information["province"]})'
-                message += f'.\n'
+                    message += f'• Address: {address_information["street"]} {address_information["number"]}, {address_information["city"]} ({address_information["province"]})'
+                message += f'\n\n'
         else:
             message = "No results to show"
         messages.append(message)
@@ -608,15 +612,48 @@ class Template:
         message = ""
         if results:
             for result in results:
-                message = f'Search #{result["id"]} with fields: (subject={result["subject"]}, city={result["city"]}, ' \
-                          f'checkin={result["checkin"]}, comune_from={result["class_from"]}, comune_to={result["comune_to"]},' \
-                          f'class_from={result["class_from"]}, class_to={result["class_to"]}, region={result["region"]},' \
-                          f'poi_activity_from={result["poi_activity_from"]}, poi_activity_to={result["poi_activity_to"]},' \
-                          f'path_number={result["path_number"]}, information={result["information"]}, shop_enum={result["shop_enum"]},' \
-                          f'order={result["order"]}, path_difficulty={result["path_difficulty"]}, info_equipment={result["info_equipment"]},' \
-                          f'time_period={result["time_period"]}, type={result["type"]}, ordinal={result["ordinal"]})'
+                message += f'Search [{result["id"]}] with fields:\n'
+                if result["subject"] != "":
+                    message += f'• subject: {result["subject"]}\n'
+                if result["city"] != "":
+                    message += f'• city: {result["city"]}\n'
+                if result["checkin"] != "":
+                    message += f'• check-in: {result["checkin"]}\n'
+                if result["comune_from"] != "":
+                    message += f'• comune from: {result["comune_from"]}\n'
+                if result["comune_to"] != "":
+                    message += f'• comune to: {result["comune_to"]}\n'
+                if result["class_from"] != "":
+                    message += f'• class from: {result["class_from"]}\n'
+                if result["class_to"] != "":
+                    message += f'• class to: {result["class_to"]}\n'
+                if result["region"] != "":
+                    message += f'• region: {result["region"]}\n'
+                if result["poi_activity_from"] != "":
+                    message += f'• activity from: {result["poi_activity_from"]}\n'
+                if result["poi_activity_to"] != "":
+                    message += f'• activity to: {result["poi_activity_to"]}\n'
+                if result["path_number"] != "":
+                    message += f'• path number: {result["path_number"]}\n'
+                if result["information"] != "":
+                    message += f'• information: {result["information"]}\n'
+                if result["shop_enum"] != "":
+                    message += f'• shop enum: {result["shop_enum"]}\n'
+                if result["order"] != "":
+                    message += f'• order: {result["order"]}\n'
+                if result["path_difficulty"] != "":
+                    message += f'• path difficulty: {result["path_difficulty"]}\n'
+                if result["info_equipment"] != "":
+                    message += f'• equipment information: {result["info_equipment"]}\n'
+                if result["time_period"] != "":
+                    message += f'• time period: {result["time_period"]}\n'
+                if result["type"] != "":
+                    message += f'• type: {result["type"]}\n'
+                if result["ordinal"] != "":
+                    message += f'• ordinal: {result["ordinal"]}\n'
+                message += "\n"
         else:
-            message = "No results to show"
+            message = "No searches to show"
         messages.append(message)
 
         return messages
