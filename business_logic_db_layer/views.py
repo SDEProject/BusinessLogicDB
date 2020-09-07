@@ -26,6 +26,7 @@ class SearchView(APIView):
 
         print(parameters)
         context = parameters['context']
+        user_id = parameters['request_parameters']['user_id']
 
         response_query = requests.get(
             f"http://{settings.SERVICE_UTILITY_HOST}:{settings.SERVICE_UTILITY_PORT}/{settings.SERVICE_UTILITY}/query_selection",
@@ -65,7 +66,8 @@ class SearchView(APIView):
             'info_equipment': context['info_equipment'],
             'time_period': context['time_period'],
             'type': context['type'],
-            'ordinal': context['ordinal']
+            'ordinal': context['ordinal'],
+            'user_id': user_id
         }
 
         response = self.get_search(search)
@@ -82,9 +84,9 @@ class SearchView(APIView):
     def get(self, request):
         parameters = request.GET
         ordinal = parameters.get('ordinal', None)
+        user_id = parameters.get('user_id', None)
 
-        print(parameters)
-        get_parameters = {}
+        get_parameters = {'user_id': user_id}
 
         response = requests.get(
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/search/",
@@ -135,12 +137,10 @@ class ResultView(APIView):
     def create_new_result(self, json, address_id):
         json["address"] = address_id
 
-        print(f"JSON WITH USER ID: {json}")
         response = requests.post(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/result/", None, json)
         return response
 
     def get_result(self, parameters):
-        print(f"GET RESULT PARAMS: {parameters}")
         response = requests.get(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/result", parameters)
         return response
 
@@ -181,7 +181,6 @@ class ResultView(APIView):
                         address = addresses[last]
                     print(f"RESULT: {result}")
                     result['user_id'] = parameters['request_parameters']['user_id']
-                    print(f"SAVE RESULTS WITH USER ID: {result}")
                     response = self.create_single_result(result, address)
                     response = Template.save_response_message("result", response.status_code)
                 else:
@@ -190,7 +189,6 @@ class ResultView(APIView):
                     for result in results:
                         index += 1
                         result['user_id'] = parameters['request_parameters']['user_id']
-                        print(f"SAVE RESULTS WITH USER ID: {result}")
                         response = self.create_single_result(result, addresses[index])
                         status_code.append(response.status_code)
                     if 201 in status_code:
@@ -310,13 +308,16 @@ class DeleteView(APIView):
         shop_enum = parameters.get('ShopEnum', None)
         user_id = parameters.get('user_id', None)
 
-        get_parameters = {'user_id': user_id}
+        #get_parameters = {'user_id': user_id}
+        get_parameters = {}
         response = requests.get(
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/" +
             type + "/", get_parameters)
         response_content = response.content.decode('utf-8')
         response_json = json.loads(response_content)
         results = response_json
+
+        print(f"RESULTS TO DELETE WITH USER ID: {results}")
 
         if subject != '':
             type_results = []
