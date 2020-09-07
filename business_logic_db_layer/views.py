@@ -308,8 +308,7 @@ class DeleteView(APIView):
         shop_enum = parameters.get('ShopEnum', None)
         user_id = parameters.get('user_id', None)
 
-        #get_parameters = {'user_id': user_id}
-        get_parameters = {}
+        get_parameters = {'user_id': user_id}
         response = requests.get(
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/" +
             type + "/", get_parameters)
