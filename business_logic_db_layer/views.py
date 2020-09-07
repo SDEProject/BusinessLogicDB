@@ -335,11 +335,14 @@ class DeleteView(APIView):
                 required_index = ordinal - 1
             else:
                 required_index = len(results) - 1
-            current_index = -1
-            for result in results:
-                current_index += 1
-                if current_index == required_index:
-                    results = [result]
+            if required_index in range(len(results)):
+                current_index = -1
+                for result in results:
+                    current_index += 1
+                    if current_index == required_index:
+                        results = [result]
+            else:
+                results = []
 
         status_codes = []
         for result in results:
