@@ -168,9 +168,6 @@ class ResultView(APIView):
             json_results = json.loads(response_content)
             results = json_results['results']
             addresses = json_results['addresses']
-            results['user_id'] = parameters['request_parameters']['user_id']
-
-            print(f"SAVE RESULTS WITH USER ID: {results}")
 
             if results:
                 if ordinal:
@@ -183,6 +180,8 @@ class ResultView(APIView):
                         result = results[last]
                         address = addresses[last]
                     print(f"RESULT: {result}")
+                    result['user_id'] = parameters['request_parameters']['user_id']
+                    print(f"SAVE RESULTS WITH USER ID: {result}")
                     response = self.create_single_result(result, address)
                     response = Template.save_response_message("result", response.status_code)
                 else:
@@ -190,6 +189,8 @@ class ResultView(APIView):
                     index = -1
                     for result in results:
                         index += 1
+                        result['user_id'] = parameters['request_parameters']['user_id']
+                        print(f"SAVE RESULTS WITH USER ID: {result}")
                         response = self.create_single_result(result, addresses[index])
                         status_code.append(response.status_code)
                     if 201 in status_code:
