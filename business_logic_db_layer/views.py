@@ -387,6 +387,7 @@ class Template:
 
                 message += f'Result [{result_information["id"]}]:\n' \
                            f'• Name: {result_information["name"]}\n'
+                print(f'type: {type}')
                 if type == 'hotel':
                     message += f'• Type: Hotel\n'
                     if result_information["stars"] is not None:
@@ -407,7 +408,8 @@ class Template:
                     message += f'• Type: Path\n'
                     message += f'• From {result_information["path_from"]} to {result_information["path_to"]}\n' \
                                f'• Total time: {result_information["time"]} minutes\n' \
-                               f'• Total distance: {result_information["path_length"]} meters'
+                               f'• Total distance: {result_information["path_length"]} meters\n' \
+                               f'• Difficulty: {result_information["path_difficulty"]}'
                 elif type == 'Shop':
                     message += f'• Type: Shop\n'
                 if type != 'ActivityPath':
