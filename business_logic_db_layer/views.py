@@ -160,7 +160,7 @@ class ResultView(APIView):
             None, parameters)
 
         print(f"ADAPTER RESPONSE: {response.content}")
-        print(f"STATUS CODE ADAPTER: {response.status_code}")
+        print(f"PARAMETERS: {parameters}")
 
         if response.status_code == 200:
             response_content = response.content.decode('utf-8')
