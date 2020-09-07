@@ -195,6 +195,7 @@ class ResultView(APIView):
                 response = Template.save_response_message("result", response.status_code)
             else:
                 response = Template.save_response_message("results", response.status_code)
+        print(f"RETRIEVE RESPONSE: {response}")
         return response
 
     def retrieve_result(self, parameters):
@@ -276,6 +277,7 @@ class ResultView(APIView):
         parameters['query'] = query
 
         response = self.save_result(parameters)
+        print(f"POST response: {response}")
 
         return JsonResponse(response)
 
@@ -482,6 +484,7 @@ class Template:
             message.append(f"No {type} found to save!")
         else:
             message.append(f"ERROR: Something was wrong!")
+        print(f"Final message: {message}")
         return message
 
     @staticmethod
