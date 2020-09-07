@@ -93,6 +93,8 @@ class SearchView(APIView):
         response_json = json.loads(response_content)
         results = response_json
 
+        print(f"GET SEARCH RESULT WITH USER ID: {results}")
+
         if ordinal:
             if ordinal != "last":
                 ordinal = int(float(ordinal))
@@ -208,6 +210,7 @@ class ResultView(APIView):
         shop_enum = parameters.get('ShopEnum', None)
 
         get_parameters = {'user_id': parameters.get('user_id')}
+        print(f"GET PARAMETERS: {get_parameters}")
         if number and info:
             get_parameters[info] = number
 
@@ -446,12 +449,6 @@ class Template:
                     message += f'• city: {result["city"]}\n'
                 if result["checkin"] != "":
                     message += f'• check-in: {result["checkin"]}\n'
-                if result["comune_from"] != "":
-                    message += f'• comune from: {result["comune_from"]}\n'
-                if result["comune_to"] != "":
-                    message += f'• comune to: {result["comune_to"]}\n'
-                if result["class_from"] != "":
-                    message += f'• class from: {result["class_from"]}\n'
                 if result["class_to"] != "":
                     message += f'• class to: {result["class_to"]}\n'
                 if result["region"] != "":
