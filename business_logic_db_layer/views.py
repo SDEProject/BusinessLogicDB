@@ -134,6 +134,8 @@ class ResultView(APIView):
 
     def create_new_result(self, json, address_id):
         json["address"] = address_id
+
+        print(f"JSON WITH USER ID: {json}")
         response = requests.post(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/result/", None, json)
         return response
 
@@ -159,7 +161,6 @@ class ResultView(APIView):
             f"http://{settings.SERVICE_MYDB_ADAPTER_LAYER_HOST}:{settings.SERVICE_MYDB_ADAPTER_LAYER_PORT}/{settings.SERVICE_MYDB_ADAPTER_LAYER}/result/",
             None, parameters)
 
-        print(f"ADAPTER RESPONSE: {response.content}")
         print(f"PARAMETERS: {parameters}")
 
         if response.status_code == 200:
@@ -167,6 +168,9 @@ class ResultView(APIView):
             json_results = json.loads(response_content)
             results = json_results['results']
             addresses = json_results['addresses']
+            results['user_id'] = parameters['request_parameters']['user_id']
+
+            print(f"SAVE RESULTS WITH USER ID: {results}")
 
             if results:
                 if ordinal:
@@ -207,7 +211,7 @@ class ResultView(APIView):
         path_difficulty = parameters.get('DifficultyActivityPath', None)
         shop_enum = parameters.get('ShopEnum', None)
 
-        get_parameters = {}
+        get_parameters = {'user_id': parameters.get('user_id')}
         if number and info:
             get_parameters[info] = number
 
@@ -217,6 +221,8 @@ class ResultView(APIView):
         response_content = response.content.decode('utf-8')
         response_json = json.loads(response_content)
         results = response_json
+
+        print(f"RESULTS WITH USER_ID: {results}")
 
         if subject != '':
             type_results = []
@@ -301,10 +307,12 @@ class DeleteView(APIView):
         subject = parameters.get('Class', None)
         path_difficulty = parameters.get('DifficultyActivityPath', None)
         shop_enum = parameters.get('ShopEnum', None)
+        user_id = parameters.get('user_id', None)
 
+        get_parameters = {'user_id': user_id}
         response = requests.get(
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/" +
-            type + "/", None)
+            type + "/", get_parameters)
         response_content = response.content.decode('utf-8')
         response_json = json.loads(response_content)
         results = response_json
