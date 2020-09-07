@@ -138,6 +138,7 @@ class ResultView(APIView):
         return response
 
     def get_result(self, parameters):
+        print(f"GET RESULT PARAMS: {parameters}")
         response = requests.get(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/result", parameters)
         return response
 
