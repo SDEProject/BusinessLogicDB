@@ -394,7 +394,7 @@ class Template:
                 message += f'Result [{result_information["id"]}]:\n' \
                            f'• Name: {result_information["name"]}\n'
                 if type == 'Hotel':
-                    message += f'• Type: Hotel\n'
+                    message += f'• Type: {result_information["accomodation_type"]}\n'
                     if result_information["stars"] is not None:
                         message += f' with {result_information["stars"]} star'
                         if result_information['stars'] > 1:
