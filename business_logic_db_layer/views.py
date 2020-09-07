@@ -516,7 +516,7 @@ class Template:
         elif status_code == 404:
             message.append(f"{type.title()} not found!")
         elif status_code == 200:
-            message.append(f"{type.title()} table is empty")
+            message.append(f"No {type} to delete")
         else:
             message.append(f"ERROR: Something was wrong!")
         return message
