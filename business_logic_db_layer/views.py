@@ -387,8 +387,7 @@ class Template:
 
                 message += f'Result [{result_information["id"]}]:\n' \
                            f'• Name: {result_information["name"]}\n'
-                print(f'type: {type}')
-                if type == 'hotel':
+                if type == 'Hotel':
                     message += f'• Type: Hotel\n'
                     if result_information["stars"] is not None:
                         message += f' with {result_information["stars"]} star'
