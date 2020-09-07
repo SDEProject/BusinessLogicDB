@@ -20,72 +20,6 @@ class SearchView(APIView):
         response = requests.get(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/search", parameters)
         return response
 
-    @swagger_auto_schema(
-        operation_description="POST in order to create one or more results in the database",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'context': openapi.Schema(type=openapi.TYPE_OBJECT,
-                                          properties={
-                                              'comune': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'comune.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'checkin': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'checkin.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'subject': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'subject.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'class_to': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'class_to.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'stop': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'stop.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'comune_from': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'comune_from.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'comune_to': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'comune_to.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'class_from': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'class_from.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'region': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'region.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'poi_activity_from': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'poi_activity_from.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'poi_activity_to': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'poi_activity_to.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'path_number': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'path_number.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'information': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'information.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'shop_enum': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'shop_enum.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'order': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'order.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'path_difficulty': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'path_difficulty.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'info_equipment': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'info_equipment.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'type_period': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'type_period.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                              'ordinal.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'type': openapi.Schema(type=openapi.TYPE_STRING),
-                                              'type.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                          }
-                                          ),
-                'request_parameters': openapi.Schema(type=openapi.TYPE_OBJECT,
-                                                     properties={
-                                                         'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                                         'type': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'intentName': openapi.Schema(type=openapi.TYPE_STRING)
-                                                     }
-                                                     )
-            },
-        ),
-        responses={
-            201: '{"fulfillmentMessages": [{"text": {"text": ["Search is saved successfully!"]}}]}',
-            200: '{"fulfillmentMessages": [{"text": {"text": ["The search is already saved!"]}}]}',
-            404: '{"fulfillmentMessages": [{"text": {"text": ["No search found to save!"]}}]}',
-            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
-        },
-        tags=['Searches']
-    )
     def post(self, request):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
@@ -145,26 +79,6 @@ class SearchView(APIView):
 
         return JsonResponse(response)
 
-    @swagger_auto_schema(
-        operation_description="POST in order to create one or more results in the database",
-        manual_parameters=[
-            openapi.Parameter('type', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_STRING),
-            openapi.Parameter('ordinal', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_NUMBER),
-            openapi.Parameter('number', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_NUMBER),
-            openapi.Parameter('Info', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_STRING)
-        ],
-
-        responses={
-            200: '{"fulfillmentMessages": [{"text": {"text": ["Search #{id} with fields: (subject={type}, city={city}, date={date}"]}}]}',
-            404: '{"fulfillmentMessages": [{"text": {"text": ["No search to show"]}}]}',
-            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
-        },
-        tags=['Searches']
-    )
     def get(self, request):
         parameters = request.GET
         ordinal = parameters.get('ordinal', None)
@@ -243,6 +157,9 @@ class ResultView(APIView):
         response = requests.post(
             f"http://{settings.SERVICE_MYDB_ADAPTER_LAYER_HOST}:{settings.SERVICE_MYDB_ADAPTER_LAYER_PORT}/{settings.SERVICE_MYDB_ADAPTER_LAYER}/result/",
             None, parameters)
+
+        print(f"ADAPTER RESPONSE: {response.content}")
+        print(f"STATUS CODE ADAPTER: {response.status_code}")
 
         if response.status_code == 200:
             response_content = response.content.decode('utf-8')
@@ -346,72 +263,6 @@ class ResultView(APIView):
         response = Template.retrieve_result_response_message(new_results)
         return response
 
-    @swagger_auto_schema(
-        operation_description="POST in order to create one or more results in the database",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'context': openapi.Schema(type=openapi.TYPE_OBJECT,
-                                                     properties={
-                                                         'comune': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'comune.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'checkin': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'checkin.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'subject': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'subject.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'class_to': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'class_to.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'stop': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'stop.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'comune_from': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'comune_from.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'comune_to': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'comune_to.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'class_from': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'class_from.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'region': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'region.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'poi_activity_from': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'poi_activity_from.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'poi_activity_to': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'poi_activity_to.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'path_number': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'path_number.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'information': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'information.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'shop_enum': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'shop_enum.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'order': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'order.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'path_difficulty': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'path_difficulty.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'info_equipment': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'info_equipment.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'type_period': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'type_period.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                                         'ordinal.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'type': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'type.original': openapi.Schema(type=openapi.TYPE_STRING),
-                                                     }
-                                                     ),
-                'request_parameters': openapi.Schema(type=openapi.TYPE_OBJECT,
-                                                     properties={
-                                                         'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
-                                                         'type': openapi.Schema(type=openapi.TYPE_STRING),
-                                                         'intentName': openapi.Schema(type=openapi.TYPE_STRING)
-                                                     }
-                                                     )
-            },
-        ),
-        responses={
-            201: '{"fulfillmentMessages": [{"text": {"text": ["Result is saved successfully!"]}}]}',
-            200: '{"fulfillmentMessages": [{"text": {"text": ["The result is already saved!"]}}]}',
-            404: '{"fulfillmentMessages": [{"text": {"text": ["No result found to save!"]}}]}',
-            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
-        },
-        tags=['Results']
-    )
     def post(self, request):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
@@ -428,26 +279,6 @@ class ResultView(APIView):
 
         return JsonResponse(response)
 
-    @swagger_auto_schema(
-        operation_description="POST in order to create one or more results in the database",
-        manual_parameters=[
-            openapi.Parameter('type', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_STRING),
-            openapi.Parameter('ordinal', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_NUMBER),
-            openapi.Parameter('number', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_NUMBER),
-            openapi.Parameter('Info', in_=openapi.IN_QUERY,
-                              type=openapi.TYPE_STRING)
-        ],
-
-        responses={
-            200: '{"fulfillmentMessages": [{"text": {"text": ["Result #{id}: {name} hotel with {star} stars in {address} {number} {city} ({province})"]}}]}',
-            404: '{"fulfillmentMessages": [{"text": {"text": ["No results to show"]}}]}',
-            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
-        },
-        tags=['Results']
-    )
     def get(self, request):
         parameters = request.GET
 
@@ -532,26 +363,6 @@ class DeleteView(APIView):
         response = Template.delete_response_message(type, status_code)
         return response
 
-    @swagger_auto_schema(
-        operation_description="POST in order to create one or more results in the database",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'ordinal': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'type': openapi.Schema(type=openapi.TYPE_STRING),
-                'Info': openapi.Schema(type=openapi.TYPE_STRING),
-                'number': openapi.Schema(type=openapi.TYPE_NUMBER),
-                'intentName': openapi.Schema(type=openapi.TYPE_STRING)
-            },
-        ),
-        responses={
-            204: '{"fulfillmentMessages": [{"text": {"text": ["The search or result is successfully deleted!"]}}]}',
-            200: '{"fulfillmentMessages": [{"text": {"text": ["Search or result not found!"]}}]}',
-            404: '{"fulfillmentMessages": [{"text": {"text": ["Search or result table is empty"]}}]}',
-            500: '{"fulfillmentMessages": [{"text": {"text": ["ERROR: Something was wrong!"]}}]}'
-        },
-        tags=['Delete results and searches']
-    )
     def post(self, request):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
@@ -661,6 +472,7 @@ class Template:
     @staticmethod
     def save_response_templates(type, status_code):
         message = []
+        print(f"DB STATUS: {status_code}")
 
         if status_code == 200:
             message.append(f"The {type} is already saved!")
