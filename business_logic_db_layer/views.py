@@ -75,7 +75,7 @@ class SearchView(APIView):
                                      search)
 
         response = Template.save_response_message("search", response.status_code)
-        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
         if "already saved" in message_content:
             status_code = 200
         elif "successfully saved" in message_content:
@@ -117,7 +117,7 @@ class SearchView(APIView):
                     results = [result]
 
         response = Template.retrieve_search_response_message(results)
-        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
         if "to show" in message_content:
             status_code = 404
         else:
@@ -300,7 +300,7 @@ class ResultView(APIView):
         parameters['query'] = query
 
         response = self.save_result(parameters)
-        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
         if "already saved" in message_content:
             status_code = 200
         elif "successfully saved" in message_content:
@@ -316,7 +316,7 @@ class ResultView(APIView):
         parameters = request.GET
 
         response = self.retrieve_result(parameters)
-        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
         print(f"MESSAGE CONTENT: {message_content}")
         if "to show" in message_content:
             status_code = 404
@@ -414,7 +414,7 @@ class DeleteView(APIView):
         parameters = json.loads(body)
 
         response = self.remove_item(parameters)
-        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
         if "successfully deleted" in message_content:
             status_code = 200
         elif "not found" in message_content:
