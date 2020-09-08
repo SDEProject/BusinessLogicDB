@@ -310,7 +310,7 @@ class ResultView(APIView):
         elif "ERROR" in message_content:
             status_code = 500
 
-        return JsonResponse(response)
+        return JsonResponse(response, status=status_code)
 
     def get(self, request):
         parameters = request.GET
