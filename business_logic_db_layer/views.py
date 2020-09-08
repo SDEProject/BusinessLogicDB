@@ -31,60 +31,72 @@ class SearchView(APIView):
         response_query = requests.get(
             f"http://{settings.SERVICE_UTILITY_HOST}:{settings.SERVICE_UTILITY_PORT}/{settings.SERVICE_UTILITY}/query_selection",
             context)
-        query = json.loads(response_query.content)['query']
-        parameters['query'] = query
 
-        information = ""
-        path_difficulty = ""
-        order = ""
+        if response_query.status_code == 200:
+            query = json.loads(response_query.content)['query']
+            parameters['query'] = query
 
-        for val in context['information']:
-            information += val + " "
+            information = ""
+            path_difficulty = ""
+            order = ""
 
-        for val in context['path_difficulty']:
-            path_difficulty += val + " "
+            for val in context['information']:
+                information += val + " "
 
-        for val in context['order']:
-            order += val + " "
+            for val in context['path_difficulty']:
+                path_difficulty += val + " "
 
-        search = {
-            'subject': context['subject'],
-            'checkin': context['checkin'],
-            'city': context['comune'],
-            'class_to': context['class_to'],
-            'region': context['region'],
-            'poi_activity_from': context['poi_activity_from'],
-            'poi_activity_to': context['poi_activity_to'],
-            'path_number': context['path_number'],
-            'information': information,
-            'shop_enum': context['shop_enum'],
-            'order': order,
-            'path_difficulty': path_difficulty,
-            'info_equipment': context['info_equipment'],
-            'time_period': context['durata'],
-            'type': context['type'],
-            'ordinal': context['ordinal'],
-            'user_id': user_id
-        }
+            for val in context['order']:
+                order += val + " "
 
-        response = self.get_search(search)
-        response_content = response.content.decode('utf-8')
-        response_json = json.loads(response_content)
-        if not response_json:
-            response = requests.post(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/search/", None,
-                                     search)
+            search = {
+                'subject': context['subject'],
+                'checkin': context['checkin'],
+                'city': context['comune'],
+                'class_to': context['class_to'],
+                'region': context['region'],
+                'poi_activity_from': context['poi_activity_from'],
+                'poi_activity_to': context['poi_activity_to'],
+                'path_number': context['path_number'],
+                'information': information,
+                'shop_enum': context['shop_enum'],
+                'order': order,
+                'path_difficulty': path_difficulty,
+                'info_equipment': context['info_equipment'],
+                'time_period': context['durata'],
+                'type': context['type'],
+                'ordinal': context['ordinal'],
+                'user_id': user_id
+            }
 
-        response = Template.save_response_message("search", response.status_code)
-        message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
-        if "already saved" in message_content:
-            status_code = 200
-        elif "successfully saved" in message_content:
-            status_code = 201
-        elif "found to save" in message_content:
-            status_code = 404
-        elif "ERROR" in message_content:
-            status_code = 500
+            response = self.get_search(search)
+            response_content = response.content.decode('utf-8')
+            response_json = json.loads(response_content)
+            if not response_json:
+                response = requests.post(f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/search/", None,
+                                         search)
 
+            response = Template.save_response_message("search", response.status_code)
+            message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
+            if "already saved" in message_content:
+                status_code = 200
+            elif "successfully saved" in message_content:
+                status_code = 201
+            elif "found to save" in message_content:
+                status_code = 404
+            elif "ERROR" in message_content:
+                status_code = 500
+        else:
+            json_response = json.loads(response_query.content)
+            messages = json_response['text']
+            status_code = response_query.status_code
+            response = {
+                "fulfillmentMessages": [{
+                    "text": {
+                        "text": [messages]
+                    }
+                }]
+            }
         return JsonResponse(response, status=status_code)
 
     def get(self, request):
@@ -296,20 +308,32 @@ class ResultView(APIView):
         response_query = requests.get(
             f"http://{settings.SERVICE_UTILITY_HOST}:{settings.SERVICE_UTILITY_PORT}/{settings.SERVICE_UTILITY}/query_selection",
             context)
-        query = json.loads(response_query.content)['query']
-        parameters['query'] = query
 
-        response = self.save_result(parameters)
-        message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
-        if "already saved" in message_content:
-            status_code = 200
-        elif "successfully saved" in message_content:
-            status_code = 201
-        elif "found to save" in message_content:
-            status_code = 404
-        elif "ERROR" in message_content:
-            status_code = 500
+        if response_query.status_code == 200:
+            query = json.loads(response_query.content)['query']
+            parameters['query'] = query
 
+            response = self.save_result(parameters)
+            message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
+            if "already saved" in message_content:
+                status_code = 200
+            elif "successfully saved" in message_content:
+                status_code = 201
+            elif "found to save" in message_content:
+                status_code = 404
+            elif "ERROR" in message_content:
+                status_code = 500
+        else:
+            json_response = json.loads(response_query.content)
+            messages = json_response['text']
+            status_code = response_query.status_code
+            response = {
+                "fulfillmentMessages": [{
+                    "text": {
+                        "text": [messages]
+                    }
+                }]
+            }
         return JsonResponse(response, status=status_code)
 
     def get(self, request):
