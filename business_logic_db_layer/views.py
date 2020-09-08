@@ -75,8 +75,17 @@ class SearchView(APIView):
                                      search)
 
         response = Template.save_response_message("search", response.status_code)
+        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        if "already saved" in message_content:
+            status_code = 200
+        elif "successfully saved" in message_content:
+            status_code = 201
+        elif "found to save" in message_content:
+            status_code = 404
+        elif "ERROR" in message_content:
+            status_code = 500
 
-        return JsonResponse(response)
+        return JsonResponse(response, status=status_code)
 
     def get(self, request):
         parameters = request.GET
@@ -108,8 +117,13 @@ class SearchView(APIView):
                     results = [result]
 
         response = Template.retrieve_search_response_message(results)
+        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        if message_content:
+            status_code = 200
+        else:
+            status_code = 404
 
-        return JsonResponse(response)
+        return JsonResponse(response, status=status_code)
 
 
 class ResultView(APIView):
@@ -286,7 +300,15 @@ class ResultView(APIView):
         parameters['query'] = query
 
         response = self.save_result(parameters)
-        print(f"POST response: {response}")
+        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        if "already saved" in message_content:
+            status_code = 200
+        elif "successfully saved" in message_content:
+            status_code = 201
+        elif "found to save" in message_content:
+            status_code = 404
+        elif "ERROR" in message_content:
+            status_code = 500
 
         return JsonResponse(response)
 
@@ -294,8 +316,13 @@ class ResultView(APIView):
         parameters = request.GET
 
         response = self.retrieve_result(parameters)
+        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        if message_content:
+            status_code = 200
+        else:
+            status_code = 404
 
-        return JsonResponse(response)
+        return JsonResponse(response, status=status_code)
 
 class DeleteView(APIView):
     def remove_item(self, parameters):
@@ -386,8 +413,17 @@ class DeleteView(APIView):
         parameters = json.loads(body)
 
         response = self.remove_item(parameters)
+        message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        if "successfully deleted" in message_content:
+            status_code = 200
+        elif "not found" in message_content:
+            status_code = 404
+        elif "to delete" in message_content:
+            status_code = 404
+        elif "ERROR" in message_content:
+            status_code = 500
 
-        return JsonResponse(response)
+        return JsonResponse(response, status=status_code)
 
 
 class Template:
