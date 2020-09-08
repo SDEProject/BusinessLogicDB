@@ -118,10 +118,10 @@ class SearchView(APIView):
 
         response = Template.retrieve_search_response_message(results)
         message_content = response["fulfillmentMessages"][0]["text"]["text"]
-        if message_content:
-            status_code = 200
-        else:
+        if "to show" in message_content:
             status_code = 404
+        else:
+            status_code = 200
 
         return JsonResponse(response, status=status_code)
 
@@ -317,10 +317,10 @@ class ResultView(APIView):
 
         response = self.retrieve_result(parameters)
         message_content = response["fulfillmentMessages"][0]["text"]["text"]
-        if message_content:
-            status_code = 200
-        else:
+        if "to show" in message_content:
             status_code = 404
+        else:
+            status_code = 200
 
         return JsonResponse(response, status=status_code)
 
