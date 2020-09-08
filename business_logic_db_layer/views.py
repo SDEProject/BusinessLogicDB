@@ -317,6 +317,7 @@ class ResultView(APIView):
 
         response = self.retrieve_result(parameters)
         message_content = response["fulfillmentMessages"][0]["text"]["text"]
+        print(f"MESSAGE CONTENT: {message_content}")
         if "to show" in message_content:
             status_code = 404
         else:
