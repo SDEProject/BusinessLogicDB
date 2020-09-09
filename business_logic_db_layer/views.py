@@ -237,10 +237,12 @@ class ResultView(APIView):
         path_difficulty = parameters.get('DifficultyActivityPath', None)
         shop_enum = parameters.get('ShopEnum', None)
 
-        get_parameters = {'user_id': parameters.get('user_id')}
+        get_parameters = {'user_id': parameters.get('user_id'), 'path_difficulty': path_difficulty, 'shop_enum': shop_enum, 'subject': subject}
+
         print(f"GET PARAMETERS: {get_parameters}")
         if number and info:
             get_parameters[info] = number
+
 
         response = requests.get(
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/result/", get_parameters)
@@ -251,6 +253,7 @@ class ResultView(APIView):
 
         print(f"RESULTS WITH USER_ID: {results}")
 
+        '''
         if subject != '':
             type_results = []
             for result in results:
@@ -271,6 +274,7 @@ class ResultView(APIView):
                 if result['shop_enum'] == shop_enum:
                     shop_result.append(result)
             results = shop_result
+        '''
 
         if ordinal:
             if ordinal != "last":
