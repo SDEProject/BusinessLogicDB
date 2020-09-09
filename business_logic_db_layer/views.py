@@ -101,6 +101,8 @@ class SearchView(APIView):
 
     def get(self, request):
         parameters = request.GET
+
+        print(f"SEARCH GET PARAMETERS: {parameters}")
         ordinal = parameters.get('ordinal', None)
         user_id = parameters.get('user_id', None)
 
@@ -338,7 +340,7 @@ class ResultView(APIView):
 
     def get(self, request):
         parameters = request.GET
-
+        print(f"RESULT GET PARAMETERS: {parameters}")
         response = self.retrieve_result(parameters)
         message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
         print(f"MESSAGE CONTENT: {message_content}")
