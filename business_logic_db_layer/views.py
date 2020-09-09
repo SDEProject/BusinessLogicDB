@@ -342,7 +342,9 @@ class DeleteView(APIView):
         shop_enum = parameters.get('ShopEnum', None)
         user_id = parameters.get('user_id', None)
 
-        get_parameters = {'user_id': user_id}
+
+        get_parameters = {'user_id': parameters.get('user_id'), 'path_difficulty': path_difficulty, 'shop_enum': shop_enum, 'type': subject}
+
         response = requests.get(
             f"http://{settings.MYDB_HOST}:{settings.MYDB_PORT}/{settings.SERVICE_MYDB_DATA_LAYER}/" +
             type + "/", get_parameters)
@@ -351,27 +353,6 @@ class DeleteView(APIView):
         results = response_json
 
         print(f"RESULTS TO DELETE WITH USER ID: {results}")
-
-        if subject != '':
-            type_results = []
-            for result in results:
-                if result['type'] == subject:
-                    type_results.append(result)
-            results = type_results
-
-        if path_difficulty != '':
-            difficulty_result = []
-            for result in results:
-                if result['path_difficulty'] == path_difficulty:
-                    difficulty_result.append(result)
-            results = difficulty_result
-
-        if shop_enum != '':
-            shop_result = []
-            for result in results:
-                if result['shop_enum'] == shop_enum:
-                    shop_result.append(result)
-            results = shop_result
 
         if ordinal:
             if ordinal != "last":
@@ -418,7 +399,7 @@ class DeleteView(APIView):
     def post(self, request):
         body = request.body.decode('utf-8')
         parameters = json.loads(body)
-
+        print(f"Delete parameters: {parameters}")
         response = self.remove_item(parameters)
         message_content = response["fulfillmentMessages"][0]["text"]["text"][0]
         if "successfully deleted" in message_content:
