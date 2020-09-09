@@ -466,8 +466,6 @@ class Template:
                     message += f'• city: {result["city"]}\n'
                 if result["checkin"] != "":
                     message += f'• check-in: {result["checkin"]}\n'
-                if result["class_to"] != "":
-                    message += f'• class to: {result["class_to"]}\n'
                 if result["region"] != "":
                     message += f'• region: {result["region"]}\n'
                 if result["poi_activity_from"] != "":
@@ -480,14 +478,10 @@ class Template:
                     message += f'• information: {result["information"]}\n'
                 if result["shop_enum"] != "":
                     message += f'• shop enum: {result["shop_enum"]}\n'
-                if result["order"] != "":
-                    message += f'• order: {result["order"]}\n'
                 if result["path_difficulty"] != "":
                     message += f'• path difficulty: {result["path_difficulty"]}\n'
                 if result["info_equipment"] != "":
                     message += f'• equipment information: {result["info_equipment"]}\n'
-                if result["time_period"] != "":
-                    message += f'• time period: {result["time_period"]}\n'
                 if result["type"] != "":
                     message += f'• type: {result["type"]}\n'
                 if result["ordinal"] != "":
