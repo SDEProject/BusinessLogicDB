@@ -49,7 +49,6 @@ class SearchView(APIView):
                 'subject': context['subject'],
                 'checkin': context['checkin'],
                 'city': context['comune'],
-                'class_to': context['class_to'],
                 'region': context['region'],
                 'poi_activity_from': context['poi_activity_from'],
                 'poi_activity_to': context['poi_activity_to'],
