@@ -38,16 +38,12 @@ class SearchView(APIView):
 
             information = ""
             path_difficulty = ""
-            order = ""
 
             for val in context['information']:
                 information += val + " "
 
             for val in context['path_difficulty']:
                 path_difficulty += val + " "
-
-            for val in context['order']:
-                order += val + " "
 
             search = {
                 'subject': context['subject'],
@@ -60,7 +56,6 @@ class SearchView(APIView):
                 'path_number': context['path_number'],
                 'information': information,
                 'shop_enum': context['shop_enum'],
-                'order': order,
                 'path_difficulty': path_difficulty,
                 'info_equipment': context['info_equipment'],
                 'time_period': context['durata'],
