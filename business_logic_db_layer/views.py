@@ -57,7 +57,6 @@ class SearchView(APIView):
                 'shop_enum': context['shop_enum'],
                 'path_difficulty': path_difficulty,
                 'info_equipment': context['info_equipment'],
-                'time_period': context['durata'],
                 'type': context['type'],
                 'ordinal': context['ordinal'],
                 'user_id': user_id
